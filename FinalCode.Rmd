@@ -1,0 +1,60 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r Importing the datasets}
+#importing the datasets
+Final_Crime_Set <- read.csv(file.choose(), na.strings = "?")
+
+#Removinng missing values from the dataset
+CrimeDataCleaned<- na.omit(Final_Crime_Set)
+
+#making a backup copy
+#write.csv(CrimeDataCleaned, file = "FinalCrimeSet.csv", row.names = FALSE)
+
+#Attaching the dataset
+attach(CrimeDataCleaned)
+
+#Converting people in immigrants into percentage
+CrimeDataCleaned$PctImig <- (CrimeDataCleaned$NumImmig/CrimeDataCleaned$population)*100
+summary(CrimeDataCleaned$PctImig)
+
+#converting people in homeless shelters into percentage
+CrimeDataCleaned$PctHomShelt <- (CrimeDataCleaned$NumInShelters/CrimeDataCleaned$population)*100
+#Converting People on the streets to a percent
+CrimeDataCleaned$PctOnStreet <- (CrimeDataCleaned$NumStreet/CrimeDataCleaned$population)*100
+```
+
+A test of correlation for each Independent variable with the dependent variable(TotaCrime) wass carried out. Thosehaving significant correlation were taken into account while constructing the first model.
+```{r 1st model}
+
+###########1st Model#####################
+m <- lm(TotalCrime~PctPopUnderPov+PctUnemployed+PctNotHSGrad+PctImmigRec10+PctPersOwnOccup+PctImig+PctHomShelt+PctOnStreet+population
+        +agePct12t21+agePct12t29+agePct16t24+agePct65up+racePctAsian+racepctblack+racePctHisp+racePctWhite
+        +medIncome+pctWWage+pctWFarmSelf+pctWInvInc+whitePerCap+blackPerCap+AsianPerCap+PctEmploy
+        +PctEmplManu+MalePctDivorce+FemalePctDiv+PersPerFam+PctFam2Par+PctKids2Par+PctWorkMomYoungKids
+        +PersPerRentOccHous+HousVacant+PctHousOccup+PctHousNoPhone+RentMedian+PctBornSameState+PopDens, data = CrimeDataCleaned)
+summary(m)
+```
+
+All those variables which had a p value less than the significant level were dropped while creating a second model. On analyzing the outcome of the second model it was found that there was considerable change in the correlation coefficient of some of the dependent variables indicating that there might be some degree of intercorrelation among them. 
+```{r 2nd Model}
+
+
+##########2nd Model#######################
+m2 <- lm(TotalCrime~PctPopUnderPov+PctNotHSGrad+PctImig+PctHomShelt+PctOnStreet+agePct65up+PctEmploy+MalePctDivorce+PersPerFam+PctKids2Par+PctWorkMomYoungKids+HousVacant+RentMedian+PctBornSameState+PopDens, data = CrimeDataCleaned)
+
+
+summary(m2)
+```
+A test for multicollinearity was carried out in MS Excel. Based on the results some of the independent variables were removed and a final model was constructed.
+```{r Final Model}
+
+m3 <- lm(TotalCrime~PctPopUnderPov+PctHomShelt+PctOnStreet+agePct65up+MalePctDivorce+PersPerFam+PctWorkMomYoungKids+HousVacant+PctBornSameState+PctImig, data = CrimeDataCleaned)
+summary(m3)
+
+
+```
